@@ -244,28 +244,24 @@
     :class="{ disabled: !canAskQuestion || isAsking }"
   >
     <div class="option-card-inner">
-      <!-- Image Section - Top -->
-      <div v-if="opt.image" class="option-image-container">
-        <div class="option-image-wrapper">
-          <div class="option-image-glow"></div>
-          <ResponsiveImage
-            :src="opt.image"
-            fit="contain"
-            :quality="90"
-            class="option-image"
-          />
-        </div>
+      <!-- Full Background Image -->
+      <div v-if="opt.image" class="option-image-background">
+        <ResponsiveImage
+          :src="opt.image"
+          fit="cover"
+          :quality="90"
+          class="option-bg-image"
+        />
+        <div class="option-overlay"></div>
       </div>
 
-      <!-- Text Section - Bottom -->
-      <div class="option-content">
+      <!-- Fallback Background for No Image -->
+      <div v-else class="option-fallback-bg"></div>
+
+      <!-- Text Overlay -->
+      <div class="option-text-overlay">
         <p class="option-text">{{ opt.text?.ar }}</p>
-        <div class="option-accent-line"></div>
       </div>
-
-      <!-- Interactive Elements -->
-      <div class="option-shine"></div>
-      <div class="option-border-glow"></div>
     </div>
   </div>
 </transition-group>
@@ -4005,25 +4001,6 @@ function cancelGuess() {
   transform: scale(1.05);
 }
 
-.option-shine {
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    45deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.1) 50%,
-    transparent 70%
-  );
-  transform: translateX(-100%);
-  transition: transform 0.6s ease;
-}
-
-.option-card:hover:not(.disabled) .option-shine {
-  transform: translateX(100%);
-}
 
 /* Stagger Slide Transition */
 .stagger-slide-enter-active,
@@ -7100,250 +7077,231 @@ function cancelGuess() {
 }
 
 /* ===============================
-   MODERN OPTION CARD DESIGN
+   STUNNING OVERLAY CARD DESIGN
    =============================== */
 
-/* Card Inner Structure */
 .option-card-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  padding: 0;
-  overflow: hidden;
-}
-
-/* Image Container - Top Section */
-.option-image-container {
   position: relative;
   width: 100%;
-  height: 200px;
+  height: 280px;
   overflow: hidden;
-  background: linear-gradient(
-    135deg,
-    rgba(139, 92, 246, 0.05) 0%,
-    rgba(168, 85, 247, 0.08) 50%,
-    rgba(192, 132, 252, 0.05) 100%
-  );
+  border-radius: 24px;
+  background: linear-gradient(135deg, #1e1e2e 0%, #2a2a3e 100%);
+  border: 2px solid var(--border-color);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.option-image-wrapper {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-}
-
-/* Glowing Effect Behind Image */
-.option-image-glow {
+/* Full Background Image */
+.option-image-background {
   position: absolute;
   inset: 0;
-  background: radial-gradient(
-    circle at center,
-    rgba(139, 92, 246, 0.15) 0%,
-    transparent 70%
+  width: 100%;
+  height: 100%;
+}
+
+.option-bg-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.option-card:hover:not(.disabled) .option-bg-image {
+  transform: scale(1.1);
+}
+
+/* Gradient Overlay for Text Readability */
+.option-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.1) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    rgba(0, 0, 0, 0.85) 100%
   );
-  opacity: 0;
-  transition: opacity 0.4s ease;
+  transition: all 0.4s ease;
 }
 
-.option-card:hover:not(.disabled) .option-image-glow {
-  opacity: 1;
+.option-card:hover:not(.disabled) .option-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(139, 92, 246, 0.2) 0%,
+    rgba(139, 92, 246, 0.4) 50%,
+    rgba(30, 20, 60, 0.95) 100%
+  );
 }
 
-/* Image Styling */
-.option-image {
-  position: relative;
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  z-index: 2;
-  transform: scale(1);
-  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+/* Fallback Background (No Image) */
+.option-fallback-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.2) 0%,
+    rgba(168, 85, 247, 0.15) 50%,
+    rgba(192, 132, 252, 0.2) 100%
+  );
 }
 
-.option-card:hover:not(.disabled) .option-image {
-  transform: scale(1.08) translateY(-4px);
-  filter: drop-shadow(0 12px 24px rgba(139, 92, 246, 0.3));
-}
-
-/* Content Section - Bottom */
-.option-content {
-  position: relative;
-  padding: 1.5rem 1.25rem;
-  background: var(--card-bg);
+/* Text Overlay */
+.option-text-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 2rem 1.5rem;
+  z-index: 10;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
-  min-height: 80px;
   justify-content: center;
+  text-align: center;
 }
 
 .option-text {
-  font-weight: 600;
-  font-size: 1.1rem;
-  text-align: center;
-  color: var(--text-color);
-  line-height: 1.4;
-  z-index: 2;
-  transition: all 0.3s ease;
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: #ffffff;
+  line-height: 1.5;
+  text-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.5),
+    0 4px 16px rgba(0, 0, 0, 0.3);
   margin: 0;
+  transition: all 0.3s ease;
+  position: relative;
 }
 
-.option-card:hover:not(.disabled) .option-text {
-  color: var(--accent-color);
-  transform: translateY(-2px);
-}
-
-/* Accent Line Under Text */
-.option-accent-line {
-  width: 40px;
+.option-text::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 60px;
   height: 3px;
   background: linear-gradient(
     90deg,
     transparent,
-    var(--accent-color),
+    rgba(255, 255, 255, 0.8),
     transparent
   );
   border-radius: 2px;
-  opacity: 0;
-  transform: scaleX(0);
-  transition: all 0.4s ease;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.option-card:hover:not(.disabled) .option-accent-line {
-  opacity: 1;
-  transform: scaleX(1);
+.option-card:hover:not(.disabled) .option-text {
+  transform: translateY(-4px) scale(1.05);
+  text-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.6),
+    0 8px 24px rgba(139, 92, 246, 0.4);
 }
 
-/* Border Glow Effect */
-.option-border-glow {
-  position: absolute;
-  inset: -2px;
-  border-radius: inherit;
-  padding: 2px;
-  background: linear-gradient(
-    135deg,
-    rgba(139, 92, 246, 0.5),
-    rgba(168, 85, 247, 0.5),
-    rgba(192, 132, 252, 0.5)
-  );
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
+.option-card:hover:not(.disabled) .option-text::after {
+  transform: translateX(-50%) scaleX(1);
 }
 
-.option-card:hover:not(.disabled) .option-border-glow {
-  opacity: 1;
+/* Card Hover Effects */
+.option-card:hover:not(.disabled) .option-card-inner {
+  transform: translateY(-8px);
+  border-color: var(--accent-color);
+  box-shadow:
+    0 20px 60px rgba(139, 92, 246, 0.4),
+    0 0 0 1px rgba(139, 92, 246, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 /* Responsive Design */
 @media (min-width: 1600px) {
-  .option-image-container {
-    height: 220px;
+  .option-card-inner {
+    height: 320px;
   }
 
-  .option-content {
-    padding: 1.75rem 1.5rem;
-    min-height: 90px;
+  .option-text-overlay {
+    padding: 2.5rem 2rem;
   }
 
   .option-text {
-    font-size: 1.15rem;
+    font-size: 1.5rem;
   }
 }
 
 @media (min-width: 1200px) and (max-width: 1599px) {
-  .option-image-container {
-    height: 200px;
+  .option-card-inner {
+    height: 300px;
   }
 
-  .option-content {
-    padding: 1.5rem 1.25rem;
-    min-height: 85px;
+  .option-text-overlay {
+    padding: 2.25rem 1.75rem;
+  }
+
+  .option-text {
+    font-size: 1.4rem;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1199px) {
+  .option-card-inner {
+    height: 260px;
+  }
+
+  .option-text-overlay {
+    padding: 2rem 1.5rem;
+  }
+
+  .option-text {
+    font-size: 1.25rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 899px) {
+  .option-card-inner {
+    height: 240px;
+  }
+
+  .option-text-overlay {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .option-text {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .option-card-inner {
+    height: 220px;
+    border-radius: 20px;
+  }
+
+  .option-text-overlay {
+    padding: 1.5rem 1rem;
   }
 
   .option-text {
     font-size: 1.1rem;
   }
-}
 
-@media (min-width: 900px) and (max-width: 1199px) {
-  .option-image-container {
-    height: 180px;
+  .option-card:hover:not(.disabled) .option-card-inner {
+    transform: translateY(-4px);
   }
 
-  .option-content {
-    padding: 1.25rem 1rem;
-    min-height: 75px;
-  }
-
-  .option-text {
-    font-size: 1.05rem;
-  }
-}
-
-@media (min-width: 768px) and (max-width: 899px) {
-  .option-image-container {
-    height: 170px;
-  }
-
-  .option-content {
-    padding: 1.25rem 1rem;
-    min-height: 70px;
-  }
-
-  .option-text {
-    font-size: 1rem;
-  }
-}
-
-@media (max-width: 767px) {
-  .option-image-container {
-    height: 160px;
-  }
-
-  .option-image-wrapper {
-    padding: 1rem;
-  }
-
-  .option-content {
-    padding: 1.125rem 0.875rem;
-    min-height: 65px;
-  }
-
-  .option-text {
-    font-size: 0.95rem;
-  }
-
-  .option-card:hover:not(.disabled) .option-image {
-    transform: scale(1.05) translateY(-2px);
+  .option-card:hover:not(.disabled) .option-bg-image {
+    transform: scale(1.05);
   }
 }
 
 @media (max-width: 480px) {
-  .option-image-container {
-    height: 140px;
+  .option-card-inner {
+    height: 200px;
+    border-radius: 18px;
   }
 
-  .option-content {
-    padding: 1rem 0.75rem;
-    min-height: 60px;
+  .option-text-overlay {
+    padding: 1.25rem 0.875rem;
   }
 
   .option-text {
-    font-size: 0.9rem;
+    font-size: 1rem;
   }
 }
 
