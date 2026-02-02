@@ -243,24 +243,30 @@
     @click="handleOption(opt)"
     :class="{ disabled: !canAskQuestion || isAsking }"
   >
- <div class="option-card-inner">
+    <div class="option-card-inner">
+      <!-- Image Section - Top -->
+      <div v-if="opt.image" class="option-image-container">
+        <div class="option-image-wrapper">
+          <div class="option-image-glow"></div>
+          <ResponsiveImage
+            :src="opt.image"
+            fit="contain"
+            :quality="90"
+            class="option-image"
+          />
+        </div>
+      </div>
 
-  <p class="option-text">{{ opt.text?.ar }}</p>
+      <!-- Text Section - Bottom -->
+      <div class="option-content">
+        <p class="option-text">{{ opt.text?.ar }}</p>
+        <div class="option-accent-line"></div>
+      </div>
 
-  <!-- يظهر فقط إذا في صورة -->
-<div v-if="opt.image" class="option-image-wrapper">
-  <div class="option-image-bg">
-    <ResponsiveImage
-      :src="opt.image"
-      fit="contain"
-      :quality="85"
-      class="option-image"
-    />
-  </div>
-</div>
-
-  <div class="option-shine"></div>
-</div>
+      <!-- Interactive Elements -->
+      <div class="option-shine"></div>
+      <div class="option-border-glow"></div>
+    </div>
   </div>
 </transition-group>
 
@@ -2061,10 +2067,6 @@ function cancelGuess() {
     gap: 1.5rem;
   }
 
-  .option-card-inner {
-    padding: 1.5rem;
-    min-height: 120px;
-  }
 
 .option-text {
   font-size: clamp(0.95rem, 2vw, 1.25rem);  /* Instead of fixed 1.1rem */
@@ -3949,79 +3951,6 @@ function cancelGuess() {
   pointer-events: none;
 }
 
-.option-card-inner {
-  position: relative;
-  border: 2px solid var(--border-color);
-
- 
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  justify-content: flex-start;
-
-  gap: 0.875rem;
-  overflow: hidden;
-  transition: all 0.4s ease;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  box-sizing: border-box;
-
-  background: linear-gradient(
-    145deg,
-    var(--card-bg) 0%,
-    rgba(255, 255, 255, 0.03) 100%
-  );
-
-  border-radius: 24px;
-  padding: 2rem 1.5rem;
-}
-
-
-@media (min-width: 1600px) {
-  .option-card-inner {
-    padding: 1.75rem 1.5rem;
-    min-height: 170px;
-    gap: 1rem;
-  }
-}
-
-@media (min-width: 1200px) and (max-width: 1599px) {
-  .option-card-inner {
-    padding: 1.5rem 1.25rem;
-    min-height: 160px;
-  }
-}
-
-@media (min-width: 900px) and (max-width: 1199px) {
-  .option-card-inner {
-    padding: 1.25rem 1rem;
-    min-height: 140px;
-  }
-}
-
-@media (min-width: 768px) and (max-width: 899px) {
-  .option-card-inner {
-    padding: 1.25rem 1rem;
-    min-height: 135px;
-  }
-}
-
-@media (min-width: 480px) and (max-width: 767px) {
-  .option-card-inner {
-    padding: 1.125rem 0.875rem;
-    min-height: 125px;
-  }
-}
-
-.option-card:hover:not(.disabled) .option-card-inner {
-  border-color: var(--accent-color);
-  background: linear-gradient(135deg, var(--card-bg) 0%, rgba(139, 92, 246, 0.05) 100%);
-  box-shadow:
-    0 12px 40px rgba(139, 92, 246, 0.2),
-    0 0 0 1px var(--accent-color),
-    inset 0 0 30px rgba(139, 92, 246, 0.1);
-}
 
 
 
@@ -4322,11 +4251,6 @@ function cancelGuess() {
     grid-template-columns: 1fr !important;
   }
 
-  .option-card-inner {
-    padding: 1rem 0.875rem;
-    min-height: 110px;
-    border-radius: 14px;
-  }
 
  
 
@@ -5461,10 +5385,6 @@ function cancelGuess() {
     padding: 0.25rem;
   }
 
-  .option-card-inner {
-    padding: 1.5rem 1.25rem;
-    min-height: 140px;
-  }
 
   .option-text {
     font-size: 1.05rem;
@@ -5641,10 +5561,6 @@ function cancelGuess() {
     gap: 1.25rem;
   }
 
-  .option-card-inner {
-    min-height: 160px;
-    padding: 1.75rem 1.5rem;
-  }
 
   .option-text {
     font-size: 1.15rem;
@@ -5717,10 +5633,6 @@ function cancelGuess() {
     gap: 0.875rem;
   }
 
-  .option-card-inner {
-    padding: 1.25rem 1rem;
-    min-height: 130px;
-  }
 
   .option-text {
     font-size: 1rem;
@@ -5866,11 +5778,6 @@ function cancelGuess() {
     padding: 0;
   }
 
-  .option-card-inner {
-    padding: 1.125rem 0.875rem;
-    min-height: 120px;
-    border-radius: 18px;
-  }
 
   .option-text {
     font-size: 0.95rem;
@@ -6080,10 +5987,6 @@ function cancelGuess() {
     font-size: 1.1rem;
   }
 
-  .option-card-inner {
-    padding: 1rem 0.75rem;
-    min-height: 110px;
-  }
 
   .option-text {
     font-size: 0.9rem;
@@ -6438,11 +6341,6 @@ function cancelGuess() {
     height: 48px;             
     font-size: 16px;
   }
-}
-.option-card-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
 
 .option-image-box {
@@ -7202,58 +7100,251 @@ function cancelGuess() {
 }
 
 /* ===============================
-   OPTION IMAGE – IMPROVED STYLE
+   MODERN OPTION CARD DESIGN
    =============================== */
 
-.option-image-wrapper {
-  width: 100%;
-  margin-top: 0.25rem;
-}
-
-.option-image-bg {
-  position: relative;
-  width: 100%;
-  height: 210px;
-  border-radius: 18px;
-
+/* Card Inner Structure */
+.option-card-inner {
   display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background: radial-gradient(
-    circle at top,
-    rgba(255, 255, 255, 0.18),
-    rgba(255, 255, 255, 0.04)
-  );
-
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-    0 8px 24px rgba(0, 0, 0, 0.25);
-
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
   overflow: hidden;
 }
 
+/* Image Container - Top Section */
+.option-image-container {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.05) 0%,
+    rgba(168, 85, 247, 0.08) 50%,
+    rgba(192, 132, 252, 0.05) 100%
+  );
+}
+
+.option-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+/* Glowing Effect Behind Image */
+.option-image-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    rgba(139, 92, 246, 0.15) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.option-card:hover:not(.disabled) .option-image-glow {
+  opacity: 1;
+}
+
+/* Image Styling */
 .option-image {
-  max-width: 90%;
-  max-height: 90%;
+  position: relative;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
-
-  transform: scale(1.05);
-  transition: transform 0.35s ease, filter 0.35s ease;
-
-  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.35));
+  z-index: 2;
+  transform: scale(1);
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
 }
 
-.option-card:hover .option-image {
-  transform: scale(1.15);
-  filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.45));
+.option-card:hover:not(.disabled) .option-image {
+  transform: scale(1.08) translateY(-4px);
+  filter: drop-shadow(0 12px 24px rgba(139, 92, 246, 0.3));
 }
 
-/* Optional text polish */
+/* Content Section - Bottom */
+.option-content {
+  position: relative;
+  padding: 1.5rem 1.25rem;
+  background: var(--card-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 80px;
+  justify-content: center;
+}
+
 .option-text {
   font-weight: 600;
+  font-size: 1.1rem;
   text-align: center;
+  color: var(--text-color);
+  line-height: 1.4;
   z-index: 2;
+  transition: all 0.3s ease;
+  margin: 0;
+}
+
+.option-card:hover:not(.disabled) .option-text {
+  color: var(--accent-color);
+  transform: translateY(-2px);
+}
+
+/* Accent Line Under Text */
+.option-accent-line {
+  width: 40px;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--accent-color),
+    transparent
+  );
+  border-radius: 2px;
+  opacity: 0;
+  transform: scaleX(0);
+  transition: all 0.4s ease;
+}
+
+.option-card:hover:not(.disabled) .option-accent-line {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+/* Border Glow Effect */
+.option-border-glow {
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.5),
+    rgba(168, 85, 247, 0.5),
+    rgba(192, 132, 252, 0.5)
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.option-card:hover:not(.disabled) .option-border-glow {
+  opacity: 1;
+}
+
+/* Responsive Design */
+@media (min-width: 1600px) {
+  .option-image-container {
+    height: 220px;
+  }
+
+  .option-content {
+    padding: 1.75rem 1.5rem;
+    min-height: 90px;
+  }
+
+  .option-text {
+    font-size: 1.15rem;
+  }
+}
+
+@media (min-width: 1200px) and (max-width: 1599px) {
+  .option-image-container {
+    height: 200px;
+  }
+
+  .option-content {
+    padding: 1.5rem 1.25rem;
+    min-height: 85px;
+  }
+
+  .option-text {
+    font-size: 1.1rem;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1199px) {
+  .option-image-container {
+    height: 180px;
+  }
+
+  .option-content {
+    padding: 1.25rem 1rem;
+    min-height: 75px;
+  }
+
+  .option-text {
+    font-size: 1.05rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 899px) {
+  .option-image-container {
+    height: 170px;
+  }
+
+  .option-content {
+    padding: 1.25rem 1rem;
+    min-height: 70px;
+  }
+
+  .option-text {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .option-image-container {
+    height: 160px;
+  }
+
+  .option-image-wrapper {
+    padding: 1rem;
+  }
+
+  .option-content {
+    padding: 1.125rem 0.875rem;
+    min-height: 65px;
+  }
+
+  .option-text {
+    font-size: 0.95rem;
+  }
+
+  .option-card:hover:not(.disabled) .option-image {
+    transform: scale(1.05) translateY(-2px);
+  }
+}
+
+@media (max-width: 480px) {
+  .option-image-container {
+    height: 140px;
+  }
+
+  .option-content {
+    padding: 1rem 0.75rem;
+    min-height: 60px;
+  }
+
+  .option-text {
+    font-size: 0.9rem;
+  }
 }
 
 </style>
