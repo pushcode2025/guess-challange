@@ -265,11 +265,16 @@
       <!-- Text Overlay -->
       <div class="option-text-overlay">
         <p class="option-text">{{ opt.text?.ar }}</p>
+      </div>
 
-        <!-- ✅ Badge إذا كان مستخدم -->
-        <span v-if="usedOptionIds.includes(opt.id)" class="used-badge">
-          ✔ تم الاختيار
-        </span>
+      <!-- Used Option Overlay -->
+      <div v-if="usedOptionIds.includes(opt.id)" class="used-overlay">
+        <div class="used-checkmark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <div class="used-label">تم الاختيار</div>
       </div>
     </div>
   </div>
@@ -7410,20 +7415,154 @@ function cancelGuess() {
     border-radius: 16px;
   }
 }
+/* ===============================
+   USED OPTION CARD DESIGN
+   =============================== */
 .option-card.used {
-  border: 2px solid #4ade80;
-  box-shadow: 0 0 12px rgba(74, 222, 128, 0.4);
+  opacity: 0.75;
 }
 
-.option-card.used .option-text {
-  text-decoration: line-through;
+.option-card.used .option-card-inner {
+  filter: grayscale(40%);
+  border: 2px solid rgba(74, 222, 128, 0.5);
 }
 
-.used-badge {
-  display: inline-block;
-  margin-top: 0.4rem;
-  font-size: 0.75rem;
-  color: #4ade80;
-  font-weight: bold;
+.option-card.used .option-bg-image {
+  opacity: 0.6;
+}
+
+/* Used Overlay */
+.used-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.92) 0%,
+    rgba(34, 197, 94, 0.88) 100%
+  );
+  backdrop-filter: blur(4px);
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  z-index: 5;
+  animation: usedOverlayFadeIn 0.4s ease-out;
+}
+
+@keyframes usedOverlayFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Checkmark Icon */
+.used-checkmark {
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    inset 0 2px 8px rgba(255, 255, 255, 0.3);
+  animation: checkmarkBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s backwards;
+}
+
+@keyframes checkmarkBounce {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(-180deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.used-checkmark svg {
+  width: 48px;
+  height: 48px;
+  color: white;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  animation: checkmarkDraw 0.5s ease-out 0.4s backwards;
+}
+
+@keyframes checkmarkDraw {
+  from {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Used Label */
+.used-label {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+  text-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.5px;
+  animation: labelSlideUp 0.5s ease-out 0.5s backwards;
+}
+
+@keyframes labelSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design for Used State */
+@media (max-width: 768px) {
+  .used-checkmark {
+    width: 64px;
+    height: 64px;
+  }
+
+  .used-checkmark svg {
+    width: 38px;
+    height: 38px;
+  }
+
+  .used-label {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .used-checkmark {
+    width: 56px;
+    height: 56px;
+  }
+
+  .used-checkmark svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .used-label {
+    font-size: 1rem;
+  }
 }
 </style>
