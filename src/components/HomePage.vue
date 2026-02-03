@@ -296,14 +296,14 @@
                 <div class="level-body">
                   <div class="level-row">
                     <span class="label">
-                      {{ $t('sub_categories_limit') }}
+                      {{ $t('questions_limit') }}
                     </span>
                     <span class="value highlight">
-                      <template v-if="level.sub_categories_limit === null">
-                        {{ $t('unlimited') }} ♾
+                      <template v-if="level.questions_limit === null">
+                         <span class="infintey">♾</span>
                       </template>
                       <template v-else>
-                        {{ level.sub_categories_limit }}
+                        {{ level.questions_limit }}
                       </template>
                     </span>
                   </div>
@@ -5917,7 +5917,9 @@ async function handleOtpSuccess() {
     font-size: 0.7rem;
   }
 }
-
+.infintey{
+  font-size: 1.6rem;
+}
 /* Mobile Extra Small - 360px */
 @media (max-width: 360px) {
   .landing-page {

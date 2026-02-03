@@ -104,9 +104,9 @@
 
       <div class="header-stats">
         <div class="stat-item">
-          <span class="stat-label">{{$t('categories')}}</span>
+          <span class="stat-label">{{$t('remaningQuesions')}}</span>
   <span class="stat-value" style="display: flex; align-items: center;">
-  <template v-if="categoriesRemaining === null">
+  <template v-if="remainingOptions === null">
     <svg 
       style="width: 30px; height: 30px; stroke-width: 1.5; opacity: 0.9;" 
       class="infinity-icon"
@@ -117,7 +117,7 @@
   </template>
 
   <template v-else>
-    {{ categoriesRemaining }}
+    {{ remainingOptions }}
   </template>
 </span>
         </div>
@@ -240,8 +240,13 @@
     :key="opt.id"
     class="option-card"
     :style="{ '--index': index }"
-    @click="handleOption(opt)"
-    :class="{ disabled: !canAskQuestion || isAsking }"
+
+    @click="canSelectOption(opt.id) && handleOption(opt)"
+
+    :class="{
+      disabled: !canSelectOption(opt.id) || isAsking,
+      used: usedOptionIds.includes(opt.id)
+    }"
   >
     <div class="option-card-inner">
       <!-- Full Background Image -->
@@ -252,19 +257,24 @@
           :quality="90"
           class="option-bg-image"
         />
-        <div class="option-overlay"></div>
       </div>
 
-      <!-- Fallback Background for No Image -->
+      <!-- Fallback Background -->
       <div v-else class="option-fallback-bg"></div>
 
       <!-- Text Overlay -->
       <div class="option-text-overlay">
         <p class="option-text">{{ opt.text?.ar }}</p>
+
+        <!-- ✅ Badge إذا كان مستخدم -->
+        <span v-if="usedOptionIds.includes(opt.id)" class="used-badge">
+          ✔ تم الاختيار
+        </span>
       </div>
     </div>
   </div>
 </transition-group>
+
 
 
 </div>
@@ -278,9 +288,9 @@
             v-for="(category, index) in state.categories"
             :key="category.id"
             class="category-card"
-            :class="{ used: category.used }"
+           
             :style="{ '--card-index': index }"
-            @click="!category.used && selectCategory(category)"
+            @click="selectCategory(category)"
           >
             <!-- Card Image Background with Parallax Effect -->
             <div class="category-image-container">
@@ -325,18 +335,7 @@
             <div class="category-shine"></div>
 
             <!-- Used Badge with Animation -->
-            <transition name="badge-appear">
-              <div v-if="category.used" class="category-used-badge">
-                <div class="used-badge-inner">
-                  <div class="used-checkmark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                  </div>
-                  <span class="used-label">تم الاختيار</span>
-                </div>
-              </div>
-            </transition>
+          
           </div>
         </transition-group>
       </div>
@@ -349,9 +348,9 @@
            v-for="(sub,index) in state.selectedCategory?.sub_categories"
             :key="sub.id"
             class="category-card"
-            :class="{ used: sub.used }"
+           
             :style="{ '--card-index': index }"
-            @click="!sub.used && selectSubCategory(sub)"
+            @click="selectSubCategory(sub)"
           >
             <!-- Card Image Background with Parallax Effect -->
             <div class="category-image-container">
@@ -392,18 +391,7 @@
             <div class="category-shine"></div>
 
             <!-- Used Badge with Animation -->
-            <transition name="badge-appear">
-              <div v-if="sub.used" class="category-used-badge">
-                <div class="used-badge-inner">
-                  <div class="used-checkmark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                  </div>
-                  <span class="used-label">تم الاختيار</span>
-                </div>
-              </div>
-            </transition>
+         
           </div>
         </transition-group>
       </div>
@@ -657,11 +645,28 @@ watch(showGuessInput, async (value) => {
     }
   }
 });
-const canSelectSubCategory = computed(() => {
-  if (state.value.subCategoriesLimit === null) return true;
+const canSelectOption = (optionId: string): boolean => {
+  if (state.value.timeRemaining !== null && state.value.timeRemaining <= 0) {
+    return false;
+  }
 
-  return state.value.subCategoriesLimit > 0;
-});
+  if (usedOptionIds.value.includes(optionId)) {
+    return false;
+  }
+
+  const limit = state.value.selectedLevel?.questions_limit ?? null;
+
+  if (limit === null) {
+    return true;
+  }
+
+  if (optionsUsedCount.value >= limit) {
+    return false;
+  }
+
+  return true;
+};
+
 onBeforeUnmount(() => {
   if (resizeObserver) resizeObserver.disconnect();
  window.removeEventListener('resize', handleResize);
@@ -676,7 +681,8 @@ const emit = defineEmits<{ endGame: [] }>();
 const gameStore = useGameStore();
 const themeStore = useThemeStore();
 const { playSound } = themeStore;
-const { state, categoriesRemaining, canAskQuestion ,timeElapsed } = storeToRefs(gameStore);
+const { state, remainingOptions,isOptionsLimitReached,usedOptionIds,optionsUsedCount, canAskQuestion ,timeElapsed } = storeToRefs(gameStore);
+
 const gameReady = ref(false);
 const isTimeLow = computed(() => {
   if (!gameReady.value) return false;
@@ -787,12 +793,8 @@ function handleResize() {
 }
 async function selectSubCategory(subCategory: SubCategory) {
 
-  // 🚫 إذا ما في فرص
-  if (!canSelectSubCategory.value || subCategory.used) {
-    playSound('warning');
-    showGuessInput.value = true;
-    return;
-  }
+
+ 
 
   playSound('click');
 
@@ -893,38 +895,30 @@ function formatTime(seconds: number): string {
 
 
 async function handleOption(option: any) {
+  // ❌ ممنوع السؤال
   if (!canAskQuestion.value || isAsking.value) return;
 
   isAsking.value = true;
   playSound('click');
 
-  const answer = await gameStore.askQuestion(option);
+  try {
+    const answer = await gameStore.askQuestion(option);
 
+    // لو ما رجع جواب (مثلاً option مستخدم)
+    if (answer === null) return;
 
-  
-  // ⬇️ هنا الاستهلاك الحقيقي
-
-
-  if (answer !== null) {
-   
     currentAnswer.value = {
       isCorrect: answer,
       text: answer ? 'yes' : 'no',
     };
 
- isAsking.value = false;
-    
     showAnswerOverlay.value = true;
-    
- 
-    
-    await nextTick();
-    
-  
 
-    await new Promise(resolve => requestAnimationFrame(() => {
-      requestAnimationFrame(resolve);
-    }));
+    await nextTick();
+
+    await new Promise(resolve =>
+      requestAnimationFrame(() => requestAnimationFrame(resolve))
+    );
 
     playSound(answer ? 'correct' : 'wrong');
 
@@ -933,39 +927,34 @@ async function handleOption(option: any) {
     showAnswerOverlay.value = false;
 
     await new Promise(resolve => setTimeout(resolve, 300));
-
-  
-
     await new Promise(resolve => setTimeout(resolve, 600));
 
+    // الرجوع للتصنيفات
     currentStep.value = 'categories';
     showCategories.value = true;
     state.value.status = 'playing';
 
-      if (gameStore.state.subCategoriesLimit !== null) {
-    gameStore.state.subCategoriesLimit--;
+    // ✅ لا يوجد أي decrement هنا
+    // الخيارات تُحسب تلقائياً من conversation.length
+
+    if (isWideLayout.value && gameStore.state.conversation.length > 0) {
+      isSidebarOpen.value = true;
+    }
+
+  } finally {
+    // ✅ تأكد دائماً يرجع false
+    isAsking.value = false;
   }
-
-    if (isWideLayout.value &&gameStore.state.conversation.length > 0) {
-    isSidebarOpen.value = true;
- }
-
-
-  
-  }
-
-  
 }
 
 watch(
-  () => gameStore.isCategoriesLimitReached,
+  () => isOptionsLimitReached,
   (reached) => {
     if (!reached) return;
 
+    // خلّصت الـ options
     gameStore.state.status = 'awaiting_guess';
-
     showLimitReached.value = true;
-
     playSound('warning');
   }
 );
@@ -7089,6 +7078,7 @@ function cancelGuess() {
   background: linear-gradient(135deg, #1e1e2e 0%, #2a2a3e 100%);
   border: 2px solid var(--border-color);
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
 }
 
 /* Full Background Image */
@@ -7111,7 +7101,7 @@ function cancelGuess() {
 }
 
 /* Very Subtle Gradient Overlay - Image Stays Fully Visible */
-.option-overlay {
+/* .option-overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(
@@ -7121,7 +7111,7 @@ function cancelGuess() {
     rgba(0, 0, 0, 0.15) 100%
   );
   transition: all 0.4s ease;
-}
+} */
 
 .option-card:hover:not(.disabled) .option-overlay {
   background: linear-gradient(
@@ -7146,10 +7136,9 @@ function cancelGuess() {
 
 /* Text Overlay - Floating Badge Design */
 .option-text-overlay {
-  position: absolute;
+  align-self: center;
   bottom: 1.5rem;
-  left: 1rem;
-  right: 1rem;
+
   z-index: 10;
   display: flex;
   align-items: center;
@@ -7197,27 +7186,15 @@ function cancelGuess() {
 .option-text::before {
   content: '';
   position: absolute;
-  inset: -0.5rem -1rem;
-  background: linear-gradient(
-    135deg,
-    rgba(0, 0, 0, 0.80) 0%,
-    rgba(0, 0, 0, 0.88) 100%
-  );
-  border-radius: 18px;
+  inset: 0;              /* ✅ full width & height */
+  background: rgba(0, 0, 0, 0.75); /* ✅ opacity فقط */
   z-index: -1;
-  border: 2px solid rgba(255, 255, 255, 0.25);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.6),
-    0 4px 16px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(255, 255, 255, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  backdrop-filter: blur(12px) saturate(150%);
-  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border-radius: 0px;   /* خفيفة – اختياري */
 }
 
 /* Glossy Shine on Badge */
 .option-text::after {
+  width: 100%;
   content: '';
   position: absolute;
   top: 0;
@@ -7433,5 +7410,20 @@ function cancelGuess() {
     border-radius: 16px;
   }
 }
+.option-card.used {
+  border: 2px solid #4ade80;
+  box-shadow: 0 0 12px rgba(74, 222, 128, 0.4);
+}
 
+.option-card.used .option-text {
+  text-decoration: line-through;
+}
+
+.used-badge {
+  display: inline-block;
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  color: #4ade80;
+  font-weight: bold;
+}
 </style>

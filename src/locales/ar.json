@@ -167,5 +167,7 @@
 "noRankingsDescription": "كن أول من يسجل نتيجة ويظهر في لوحة المتصدرين",
 "startPlayingHint": "ابدأ اللعب الآن لتصبح في القمة!",
 "back":"عودة",
-"uploadImage":"إرفع صورة"
+"uploadImage":"إرفع صورة",
+"questions_limit":"الحد الأقصى للأسئلة",
+"remaningQuesions":"الأسئلة المتبقية"
 }

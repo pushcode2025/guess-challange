@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { computed, ref,watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 // import { supabase, type LeaderboardEntry } from '../lib/supabase';
 import api from '../lib/api';
 import type { Theme } from '../models/Theme';
@@ -33,6 +33,7 @@ interface GameEntity {
 interface GameState {
   sessionId: string | null;
   user: User | null;
+  questionsLimit: number | null;
   selectedTheme: Theme | null;
   selectedLevel: Level | null;
   categories: Category[];
@@ -44,10 +45,10 @@ interface GameState {
   questions: Question[];
   conversation: { option: QuestionOption; answer: boolean }[];
   questionsAsked: number;
-  subCategoriesLimit: number | null;
+
   timeLimit: number;
   timeRemaining: number;
- status: GameStatus;
+  status: GameStatus;
   entity: GameEntity | null
   score: number;
   resultSummary?: {
@@ -56,11 +57,11 @@ interface GameState {
   } | null;
 
   selectedGuessEntity: {
-  id: string;
-  name: string;
-  image_url?: string | null;
-  attributes?: any;
-} | null;
+    id: string;
+    name: string;
+    image_url?: string | null;
+    attributes?: any;
+  } | null;
 }
 
 export const useGameStore = defineStore('game', () => {
@@ -73,13 +74,14 @@ export const useGameStore = defineStore('game', () => {
     selectedCategory: null,
     questions: [],
     conversation: [],
+    questionsLimit: null,
     loseReason: null,
     questionsAsked: 0,
-    subCategoriesLimit: null,
+   
     timeLimit: null,
     timeRemaining: null,
     selectedGuessEntity: null,
-     status: 'idle' as GameStatus,
+    status: 'idle' as GameStatus,
     entity: null,
     resultSummary: null,
     score: 0,
@@ -90,34 +92,57 @@ export const useGameStore = defineStore('game', () => {
 
   let timerInterval: number | null = null;
 
-const isCategoriesLimitReached = computed(() => {
-  if (state.value.subCategoriesLimit === null) return false;
-  return state.value.subCategoriesLimit <= 0;
+const isOptionsLimitReached = computed(() => {
+  if (remainingOptions.value === null) return false;
+  return remainingOptions.value === 0;
 });
-watch(
-  () => state.value.status,
-  (status) => {
-    console.log('⏱ status changed →', status);
 
-    if (status === 'playing') {
-      startTimer();
-    } else {
-      stopTimer();
+  const usedOptionIds = computed(() =>
+    state.value.conversation.map(c => c.option.id)
+  );
+const remainingOptions = computed<number | null>(() => {
+  const limit = state.value.selectedLevel?.questions_limit ?? null;
+
+  if (limit === null) return null;
+
+  return Math.max(0, limit - state.value.conversation.length);
+});
+  const optionsUsedCount = computed(() =>
+    state.value.conversation.length
+  );
+  watch(
+    () => state.value.status,
+    (status) => {
+      console.log('⏱ status changed →', status);
+
+      if (status === 'playing') {
+        startTimer();
+      } else {
+        stopTimer();
+      }
     }
-  }
-);
+  );
+
+  const askedOptionIds = computed(() =>
+    state.value.conversation.map(c => c.option.id)
+  );
   const isPlaying = computed(() => state.value.status === 'playing');
   const askedQuestionsCount = computed(() => state.value.questionsAsked);
-  const categoriesRemaining = computed(() => {
-    return state.value.subCategoriesLimit;
-  });
+
 
   const timeElapsed = computed(() => state.value.timeLimit - state.value.timeRemaining);
   const canAskQuestion = computed(() => {
     if (state.value.timeRemaining <= 0) return false;
-    if (state.value.subCategoriesLimit === null) return true;
-    return state.value.subCategoriesLimit > 0;
-  }); async function fetchThemeById(id: string): Promise<Theme> {
+
+    const limit = state.value.selectedLevel?.questions_limit;
+
+    // null = unlimited options
+    if (limit === null) return true;
+
+    return optionsUsedCount.value < limit;
+  });
+
+  async function fetchThemeById(id: string): Promise<Theme> {
     try {
       const res = await api.get(`/themes/${id}`);
       const raw = res.data.data || res.data;
@@ -137,13 +162,13 @@ watch(
       return null;
     }
   }
-function setSelectedGuessEntity(entity: any) {
-  state.value.selectedGuessEntity = entity;
-}
+  function setSelectedGuessEntity(entity: any) {
+    state.value.selectedGuessEntity = entity;
+  }
 
-function clearSelectedGuessEntity() {
-  state.value.selectedGuessEntity = null;
-}
+  function clearSelectedGuessEntity() {
+    state.value.selectedGuessEntity = null;
+  }
   async function fetchLevelById(id: string): Promise<Level> {
     try {
       const res = await api.get(`/levels/${id}`);
@@ -152,6 +177,7 @@ function clearSelectedGuessEntity() {
       return {
         id: raw.id,
         name: raw.name,
+        questions_limit:raw.questions_limit,
         hint: raw.hint,
         slug: raw.slug,
         questions_per_attempt: raw.questions_per_attempt,
@@ -214,8 +240,8 @@ function clearSelectedGuessEntity() {
       state.value.conversation = [];
       state.value.questionsAsked = 0;
 
-      state.value.timeUp = false;   
-state.value.loseReason = null;
+      state.value.timeUp = false;
+      state.value.loseReason = null;
 
       state.value.categories = (data.categories || []).map((cat: any) => {
         console.log('image', cat.image);
@@ -227,7 +253,7 @@ state.value.loseReason = null;
           slug: cat.slug,
           image: cat.image,
           description: cat.description,
-       
+
           sub_categories: cat.sub_categories || [],
         }
 
@@ -235,13 +261,13 @@ state.value.loseReason = null;
       );
 
 
-      state.value.subCategoriesLimit = level.sub_categories_limit;
+      state.value.questionsLimit = level.questions_limit;
       state.value.timeLimit = level.level_time;
       state.value.timeRemaining = level.level_time;
-     
+
       state.value.entity = null;
       state.value.score = 0;
-   
+
       state.value.status = 'playing';
 
       return true;
@@ -250,57 +276,57 @@ state.value.loseReason = null;
       return false;
     }
   }
-async function verifyGuess(guessEntityId: string) {
-  if (!state.value.sessionId) {
-    console.error('No active session to verify guess.');
-    return null;
-  }
+  async function verifyGuess(guessEntityId: string) {
+    if (!state.value.sessionId) {
+      console.error('No active session to verify guess.');
+      return null;
+    }
 
-  try {
-    const response = await api.post('/verify-guess', {
-      session_token: state.value.sessionId,
-      guess_entity_id: guessEntityId,
-    });
+    try {
+      const response = await api.post('/verify-guess', {
+        session_token: state.value.sessionId,
+        guess_entity_id: guessEntityId,
+      });
 
-    const data = response.data.data;
+      const data = response.data.data;
 
-    if (data.entity) {
-      state.value.entity = {
-        name: data.entity.name,
-        image_url: data.entity.image_url,
-        attributes: data.entity.attributes || {},
+      if (data.entity) {
+        state.value.entity = {
+          name: data.entity.name,
+          image_url: data.entity.image_url,
+          attributes: data.entity.attributes || {},
+        };
+      }
+
+      state.value.status = data.game_result === 'won'
+        ? 'won'
+        : 'lost';
+
+      state.value.resultSummary = {
+        type: data.game_result === 'won' ? 'won' : 'lose',
+        message:
+          data.game_result === 'won'
+            ? '🎉 إجابة صحيحة!'
+            : `❌ الجواب الصحيح هو: ${data.entity?.name}`,
       };
+
+      if (data.final_score !== undefined) {
+        state.value.score = data.final_score;
+      }
+
+      return { gameResult: data.game_result };
+
+    } catch (error) {
+      console.error('Error verifying guess:', error);
+      return null;
     }
-
-   state.value.status = data.game_result === 'won'
-  ? 'won'
-  : 'lost';
-
-    state.value.resultSummary = {
-      type: data.game_result === 'won' ? 'won' : 'lose',
-      message:
-        data.game_result === 'won'
-          ? '🎉 إجابة صحيحة!'
-          : `❌ الجواب الصحيح هو: ${data.entity?.name}`,
-    };
-
-    if (data.final_score !== undefined) {
-      state.value.score = data.final_score;
-    }
-
-    return { gameResult: data.game_result };
-
-  } catch (error) {
-    console.error('Error verifying guess:', error);
-    return null;
   }
-}
 
 
 
 
   async function giveUp() {
- 
+
 
     try {
       const response = await api.post('/give-up', {
@@ -351,7 +377,7 @@ async function verifyGuess(guessEntityId: string) {
         id: item.id,
         name: item.name,
         attributes: item.attributes || {},
-        image_url:item.image_url || null,
+        image_url: item.image_url || null,
       }));
 
       return suggestions;
@@ -391,7 +417,15 @@ async function verifyGuess(guessEntityId: string) {
 
   async function askQuestion(option: QuestionOption) {
     if (!state.value.sessionId || !canAskQuestion.value) return null;
+    if (usedOptionIds.value.includes(option.id)) {
+      console.warn('Option already used');
+      return null;
+    }
 
+    if (!canAskQuestion.value) {
+      console.warn('Options limit reached');
+      return null;
+    }
     try {
 
 
@@ -401,7 +435,7 @@ async function verifyGuess(guessEntityId: string) {
       });
 
       const data = response.data;
-      
+
       const isYes = data.answer === 'yes';
 
       state.value.conversation.push({
@@ -411,13 +445,13 @@ async function verifyGuess(guessEntityId: string) {
 
       state.value.questionsAsked += 1;
 
-     
+
       state.value.categories = response.data.categories;
-      state.value.selectedCategory = response.data.categories.filter((cat)=>cat.id === state.value.selectedCategory?.id)[0] || null;
+      state.value.selectedCategory = response.data.categories.filter((cat) => cat.id === state.value.selectedCategory?.id)[0] || null;
 
 
       state.value.questions = [];
-    
+
       state.value.selectedSubCategory = null;
       state.value.status = 'idle';
 
@@ -432,9 +466,9 @@ async function verifyGuess(guessEntityId: string) {
 
 
   function resetTimerForRound() {
-    
+
     state.value.timeRemaining = state.value.selectedLevel?.time_per_attempt || 60; // أو أي قيمة افتراضية
-    
+
   }
 
   async function fetchNextQuestions(count?: number) {
@@ -457,105 +491,105 @@ async function verifyGuess(guessEntityId: string) {
       return [];
     }
   }
-async function submitGuess(guess: string) {
-  if (!state.value.sessionId) return;
-
- 
-
-  try {
-    const res = await api.post('/verify-guess', {
-      session_token: state.value.sessionId,
-      guess_name: guess,
-    });
-
-    const data = res.data.data;
-
-    state.value.status = data.game_result; // won | lost
-    state.value.entity = data.entity;
-
-    state.value.resultSummary = {
-      type: data.game_result === 'won' ? 'win' : 'lose',
-      message:
-        data.game_result === 'won'
-          ? '🎉 إجابة صحيحة!'
-          : `❌ الجواب الصحيح هو: ${data.entity.name}`,
-    };
-
-    return data;
-
-  } catch (e) {
-    console.error('submitGuess error', e);
-  }
-}
+  async function submitGuess(guess: string) {
+    if (!state.value.sessionId) return;
 
 
-async function fetchFinalEntity() {
-  console.log('start')
-  console.log(state.value.sessionId);
-  if (!state.value.sessionId) return null;
 
-  try {
-    const res = await api.post('/reveal-entity', {
-      session_token: state.value.sessionId,
-    });
+    try {
+      const res = await api.post('/verify-guess', {
+        session_token: state.value.sessionId,
+        guess_name: guess,
+      });
 
-    const data = res.data.data;
+      const data = res.data.data;
 
-    if (data.entity) {
-      state.value.entity = {
-        name: data.entity.name,
-        image_url: data.entity.image_url,
-        attributes: data.entity.attributes || {},
+      state.value.status = data.game_result; // won | lost
+      state.value.entity = data.entity;
+
+      state.value.resultSummary = {
+        type: data.game_result === 'won' ? 'win' : 'lose',
+        message:
+          data.game_result === 'won'
+            ? '🎉 إجابة صحيحة!'
+            : `❌ الجواب الصحيح هو: ${data.entity.name}`,
       };
 
-      if (!state.value.loseReason) {
-        state.value.loseReason = 'guess_wrong';
+      return data;
+
+    } catch (e) {
+      console.error('submitGuess error', e);
+    }
+  }
+
+
+  async function fetchFinalEntity() {
+    console.log('start')
+    console.log(state.value.sessionId);
+    if (!state.value.sessionId) return null;
+
+    try {
+      const res = await api.post('/reveal-entity', {
+        session_token: state.value.sessionId,
+      });
+
+      const data = res.data.data;
+
+      if (data.entity) {
+        state.value.entity = {
+          name: data.entity.name,
+          image_url: data.entity.image_url,
+          attributes: data.entity.attributes || {},
+        };
+
+        if (!state.value.loseReason) {
+          state.value.loseReason = 'guess_wrong';
+        }
+
+        state.value.status = 'lost';
       }
 
-      state.value.status = 'lost';
+      return state.value.entity;
+
+    } catch (e) {
+      console.error('Error fetching final entity:', e);
+      return null;
     }
-
-    return state.value.entity;
-
-  } catch (e) {
-    console.error('Error fetching final entity:', e);
-    return null;
   }
-}
 
 
-function startTimer() {
-  // تأكد ما في تايمر شغال
-  stopTimer();
+  function startTimer() {
+    // تأكد ما في تايمر شغال
+    stopTimer();
 
-  timerInterval = window.setInterval(async () => {
-    // إذا اللعبة مش بحالة playing → أوقف التايمر
-    if (state.value.status !== 'playing') {
-      stopTimer();
-      return;
-    }
+    timerInterval = window.setInterval(async () => {
+      // إذا اللعبة مش بحالة playing → أوقف التايمر
+      if (state.value.status !== 'playing') {
+        stopTimer();
+        return;
+      }
 
-    if (state.value.timeRemaining > 0) {
-      state.value.timeRemaining--;
-      return;
-    }
+      if (state.value.timeRemaining > 0) {
+        state.value.timeRemaining--;
+        return;
+      }
 
-  if (state.value.timeRemaining <= 0) {
-  stopTimer();
+      if (state.value.timeRemaining <= 0) {
+        stopTimer();
 
-  if (state.value.timeUp) return;
+        if (state.value.timeUp) return;
 
-  
 
-  state.value.timeUp = true;
-  await fetchFinalEntity();
-  state.value.status = 'lost'; 
-  state.value.loseReason = 'time_up';    
 
-  return;
-}
-  }, 1000);
-}
+        state.value.timeUp = true;
+        await fetchFinalEntity();
+        state.value.status = 'lost';
+        state.value.loseReason = 'time_up';
+
+        return;
+      }
+    }, 1000);
+  }
 
 
   function stopTimer() {
@@ -566,7 +600,7 @@ function startTimer() {
   }
 
   function resetGame() {
-   
+
     const auth = useAuthStore();
     state.value = {
       sessionId: null,
@@ -576,7 +610,7 @@ function startTimer() {
       questions: [],
       conversation: [],
       questionsAsked: 0,
-      subCategoriesLimit: 0,
+   
       timeLimit: 0,
       timeRemaining: 0,
       status: 'idle',
@@ -610,8 +644,8 @@ function startTimer() {
         name: item.name,
         slug: item.slug,
         icon: item.icon,
-        is_coming_soon:item.is_coming_soon,
-        image:item.image,
+        is_coming_soon: item.is_coming_soon,
+        image: item.image,
         description: item.description ? item.description : null,
         created_at: item.created_at,
         updated_at: item.updated_at,
@@ -668,7 +702,7 @@ function startTimer() {
     state,
     isPlaying,
     fetchFinalEntity,
-    categoriesRemaining,
+  
     timeElapsed,
     canAskQuestion,
     startGame,
@@ -691,7 +725,12 @@ function startTimer() {
     askedQuestionsCount,
     setSelectedGuessEntity,
     clearSelectedGuessEntity,
-    isCategoriesLimitReached
+    remainingOptions,
+    isOptionsLimitReached,
+    usedOptionIds,
+    optionsUsedCount
+    
+    
 
   };
 });

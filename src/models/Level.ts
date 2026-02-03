@@ -4,6 +4,7 @@ export interface Level {
   name: string;
   categories_count: number;
   time_per_attempt: number;
+  questions_limit:number | null
   sub_categories_limit? : number | null
   level_time:number;
   hint:string;

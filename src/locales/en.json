@@ -165,6 +165,8 @@
 "noRankingsDescription": "Be the first to score and appear on the leaderboard",
 "startPlayingHint": "Start playing now to reach the top!",
 "back":"Back",
-"uploadImage":"Upload Image"
+"uploadImage":"Upload Image",
+"questions_limit":"Questions Limit",
+"remaningQuesions":"Remaning Questions"
   
 }
