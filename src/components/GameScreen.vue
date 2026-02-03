@@ -7116,9 +7116,9 @@ function cancelGuess() {
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(0, 0, 0, 0.1) 0%,
-    rgba(0, 0, 0, 0.4) 50%,
-    rgba(0, 0, 0, 0.85) 100%
+    rgba(0, 0, 0, 0.05) 0%,
+    rgba(0, 0, 0, 0.15) 60%,
+    rgba(0, 0, 0, 0.3) 100%
   );
   transition: all 0.4s ease;
 }
@@ -7126,9 +7126,9 @@ function cancelGuess() {
 .option-card:hover:not(.disabled) .option-overlay {
   background: linear-gradient(
     180deg,
-    rgba(139, 92, 246, 0.2) 0%,
-    rgba(139, 92, 246, 0.4) 50%,
-    rgba(30, 20, 60, 0.95) 100%
+    rgba(139, 92, 246, 0.1) 0%,
+    rgba(139, 92, 246, 0.2) 60%,
+    rgba(30, 20, 60, 0.4) 100%
   );
 }
 
@@ -7158,42 +7158,83 @@ function cancelGuess() {
   text-align: center;
 }
 
+/* Frosted Glass Panel Behind Text */
+.option-text-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.18) 100%
+  );
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-top: 2px solid rgba(255, 255, 255, 0.25);
+  box-shadow:
+    0 -4px 24px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.option-card:hover:not(.disabled) .option-text-overlay::before {
+  background: linear-gradient(
+    180deg,
+    rgba(139, 92, 246, 0.25) 0%,
+    rgba(139, 92, 246, 0.40) 100%
+  );
+  border-top-color: rgba(139, 92, 246, 0.7);
+  box-shadow:
+    0 -8px 32px rgba(139, 92, 246, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
 .option-text {
-  font-weight: 700;
-  font-size: 1.3rem;
+  font-weight: 800;
+  font-size: 1.5rem;
   color: #ffffff;
-  line-height: 1.5;
+  line-height: 1.3;
+  letter-spacing: 0.5px;
   text-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.5),
-    0 4px 16px rgba(0, 0, 0, 0.3);
+    0 2px 4px rgba(0, 0, 0, 0.9),
+    0 4px 12px rgba(0, 0, 0, 0.7),
+    0 1px 0 rgba(0, 0, 0, 1),
+    0 0 20px rgba(255, 255, 255, 0.15);
   margin: 0;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
+  z-index: 1;
+  -webkit-text-stroke: 0.5px rgba(0, 0, 0, 0.4);
+  paint-order: stroke fill;
 }
 
 .option-text::after {
   content: '';
   position: absolute;
-  bottom: -8px;
+  bottom: -12px;
   left: 50%;
   transform: translateX(-50%) scaleX(0);
-  width: 60px;
-  height: 3px;
+  width: 80px;
+  height: 4px;
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0.95),
     transparent
   );
   border-radius: 2px;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
   transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .option-card:hover:not(.disabled) .option-text {
-  transform: translateY(-4px) scale(1.05);
+  transform: translateY(-6px) scale(1.08);
   text-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.6),
-    0 8px 24px rgba(139, 92, 246, 0.4);
+    0 4px 8px rgba(0, 0, 0, 1),
+    0 8px 20px rgba(0, 0, 0, 0.8),
+    0 2px 0 rgba(0, 0, 0, 1),
+    0 0 30px rgba(139, 92, 246, 0.6);
+  -webkit-text-stroke: 0.8px rgba(0, 0, 0, 0.5);
 }
 
 .option-card:hover:not(.disabled) .option-text::after {
@@ -7221,7 +7262,8 @@ function cancelGuess() {
   }
 
   .option-text {
-    font-size: 1.5rem;
+    font-size: 1.65rem;
+    font-weight: 800;
   }
 }
 
@@ -7235,7 +7277,8 @@ function cancelGuess() {
   }
 
   .option-text {
-    font-size: 1.4rem;
+    font-size: 1.55rem;
+    font-weight: 800;
   }
 }
 
@@ -7249,7 +7292,8 @@ function cancelGuess() {
   }
 
   .option-text {
-    font-size: 1.25rem;
+    font-size: 1.4rem;
+    font-weight: 800;
   }
 }
 
@@ -7263,7 +7307,8 @@ function cancelGuess() {
   }
 
   .option-text {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
+    font-weight: 800;
   }
 }
 
@@ -7278,7 +7323,9 @@ function cancelGuess() {
   }
 
   .option-text {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
+    font-weight: 800;
+    -webkit-text-stroke: 0.4px rgba(0, 0, 0, 0.4);
   }
 
   .option-card:hover:not(.disabled) .option-card-inner {
@@ -7287,6 +7334,10 @@ function cancelGuess() {
 
   .option-card:hover:not(.disabled) .option-bg-image {
     transform: scale(1.05);
+  }
+
+  .option-card:hover:not(.disabled) .option-text {
+    transform: translateY(-4px) scale(1.05);
   }
 }
 
@@ -7301,7 +7352,9 @@ function cancelGuess() {
   }
 
   .option-text {
-    font-size: 1rem;
+    font-size: 1.1rem;
+    font-weight: 800;
+    -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.4);
   }
 }
 
