@@ -7110,15 +7110,15 @@ function cancelGuess() {
   transform: scale(1.1);
 }
 
-/* Gradient Overlay for Text Readability */
+/* Very Subtle Gradient Overlay - Image Stays Fully Visible */
 .option-overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(0, 0, 0, 0.05) 0%,
-    rgba(0, 0, 0, 0.15) 60%,
-    rgba(0, 0, 0, 0.3) 100%
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.05) 70%,
+    rgba(0, 0, 0, 0.15) 100%
   );
   transition: all 0.4s ease;
 }
@@ -7126,9 +7126,9 @@ function cancelGuess() {
 .option-card:hover:not(.disabled) .option-overlay {
   background: linear-gradient(
     180deg,
-    rgba(139, 92, 246, 0.1) 0%,
-    rgba(139, 92, 246, 0.2) 60%,
-    rgba(30, 20, 60, 0.4) 100%
+    rgba(139, 92, 246, 0.05) 0%,
+    rgba(139, 92, 246, 0.1) 70%,
+    rgba(139, 92, 246, 0.2) 100%
   );
 }
 
@@ -7144,101 +7144,140 @@ function cancelGuess() {
   );
 }
 
-/* Text Overlay */
+/* Text Overlay - Floating Badge Design */
 .option-text-overlay {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 2rem 1.5rem;
+  bottom: 1.5rem;
+  left: 1rem;
+  right: 1rem;
   z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-}
-
-/* Frosted Glass Panel Behind Text */
-.option-text-overlay::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.08) 0%,
-    rgba(255, 255, 255, 0.18) 100%
-  );
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border-top: 2px solid rgba(255, 255, 255, 0.25);
-  box-shadow:
-    0 -4px 24px rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.option-card:hover:not(.disabled) .option-text-overlay::before {
-  background: linear-gradient(
-    180deg,
-    rgba(139, 92, 246, 0.25) 0%,
-    rgba(139, 92, 246, 0.40) 100%
-  );
-  border-top-color: rgba(139, 92, 246, 0.7);
-  box-shadow:
-    0 -8px 32px rgba(139, 92, 246, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  pointer-events: none;
 }
 
 .option-text {
-  font-weight: 800;
-  font-size: 1.5rem;
+  font-weight: 900;
+  font-size: 1.6rem;
   color: #ffffff;
-  line-height: 1.3;
-  letter-spacing: 0.5px;
-  text-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.9),
-    0 4px 12px rgba(0, 0, 0, 0.7),
-    0 1px 0 rgba(0, 0, 0, 1),
-    0 0 20px rgba(255, 255, 255, 0.15);
+  line-height: 1.25;
+  letter-spacing: 0.3px;
   margin: 0;
+  padding: 1rem 1.75rem;
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
-  z-index: 1;
-  -webkit-text-stroke: 0.5px rgba(0, 0, 0, 0.4);
-  paint-order: stroke fill;
+  z-index: 2;
+  max-width: 100%;
+  word-wrap: break-word;
+
+  /* Powerful Multi-Layer Text Shadow for Maximum Readability */
+  text-shadow:
+    /* Thick black outline for contrast */
+    -2px -2px 0 rgba(0, 0, 0, 0.95),
+    2px -2px 0 rgba(0, 0, 0, 0.95),
+    -2px 2px 0 rgba(0, 0, 0, 0.95),
+    2px 2px 0 rgba(0, 0, 0, 0.95),
+    -3px 0 0 rgba(0, 0, 0, 0.9),
+    3px 0 0 rgba(0, 0, 0, 0.9),
+    0 -3px 0 rgba(0, 0, 0, 0.9),
+    0 3px 0 rgba(0, 0, 0, 0.9),
+
+    /* Soft glow for depth */
+    0 0 20px rgba(0, 0, 0, 0.8),
+    0 0 40px rgba(0, 0, 0, 0.6),
+
+    /* Sharp depth shadows */
+    0 4px 8px rgba(0, 0, 0, 0.9),
+    0 8px 16px rgba(0, 0, 0, 0.7);
 }
 
+/* Floating Compact Badge Background Behind Text Only */
+.option-text::before {
+  content: '';
+  position: absolute;
+  inset: -0.5rem -1rem;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.80) 0%,
+    rgba(0, 0, 0, 0.88) 100%
+  );
+  border-radius: 18px;
+  z-index: -1;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    0 4px 16px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+}
+
+/* Glossy Shine on Badge */
 .option-text::after {
   content: '';
   position: absolute;
-  bottom: -12px;
-  left: 50%;
-  transform: translateX(-50%) scaleX(0);
-  width: 80px;
-  height: 4px;
+  top: 0;
+  left: 5%;
+  right: 5%;
+  height: 50%;
   background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.95),
-    transparent
+    180deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    transparent 100%
   );
-  border-radius: 2px;
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border-radius: 18px 18px 0 0;
+  z-index: -1;
+  transition: all 0.4s ease;
 }
 
 .option-card:hover:not(.disabled) .option-text {
-  transform: translateY(-6px) scale(1.08);
+  transform: translateY(-8px) scale(1.05);
   text-shadow:
-    0 4px 8px rgba(0, 0, 0, 1),
-    0 8px 20px rgba(0, 0, 0, 0.8),
-    0 2px 0 rgba(0, 0, 0, 1),
-    0 0 30px rgba(139, 92, 246, 0.6);
-  -webkit-text-stroke: 0.8px rgba(0, 0, 0, 0.5);
+    /* Enhanced outline */
+    -2px -2px 0 rgba(0, 0, 0, 1),
+    2px -2px 0 rgba(0, 0, 0, 1),
+    -2px 2px 0 rgba(0, 0, 0, 1),
+    2px 2px 0 rgba(0, 0, 0, 1),
+    -3px 0 0 rgba(0, 0, 0, 0.95),
+    3px 0 0 rgba(0, 0, 0, 0.95),
+    0 -3px 0 rgba(0, 0, 0, 0.95),
+    0 3px 0 rgba(0, 0, 0, 0.95),
+
+    /* Magical purple glow */
+    0 0 25px rgba(139, 92, 246, 0.9),
+    0 0 50px rgba(139, 92, 246, 0.7),
+    0 0 75px rgba(139, 92, 246, 0.5),
+
+    /* Deep shadows */
+    0 4px 12px rgba(0, 0, 0, 1),
+    0 8px 24px rgba(0, 0, 0, 0.8);
+}
+
+.option-card:hover:not(.disabled) .option-text::before {
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.90) 0%,
+    rgba(168, 85, 247, 0.95) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 12px 48px rgba(139, 92, 246, 0.7),
+    0 6px 24px rgba(139, 92, 246, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transform: scale(1.02);
 }
 
 .option-card:hover:not(.disabled) .option-text::after {
-  transform: translateX(-50%) scaleX(1);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    transparent 100%
+  );
 }
 
 /* Card Hover Effects */
@@ -7258,12 +7297,13 @@ function cancelGuess() {
   }
 
   .option-text-overlay {
-    padding: 2.5rem 2rem;
+    bottom: 2rem;
   }
 
   .option-text {
-    font-size: 1.65rem;
-    font-weight: 800;
+    font-size: 1.75rem;
+    font-weight: 900;
+    padding: 1.1rem 2rem;
   }
 }
 
@@ -7273,12 +7313,13 @@ function cancelGuess() {
   }
 
   .option-text-overlay {
-    padding: 2.25rem 1.75rem;
+    bottom: 1.75rem;
   }
 
   .option-text {
-    font-size: 1.55rem;
-    font-weight: 800;
+    font-size: 1.65rem;
+    font-weight: 900;
+    padding: 1.05rem 1.85rem;
   }
 }
 
@@ -7288,12 +7329,13 @@ function cancelGuess() {
   }
 
   .option-text-overlay {
-    padding: 2rem 1.5rem;
+    bottom: 1.5rem;
   }
 
   .option-text {
-    font-size: 1.4rem;
-    font-weight: 800;
+    font-size: 1.5rem;
+    font-weight: 900;
+    padding: 1rem 1.75rem;
   }
 }
 
@@ -7303,12 +7345,13 @@ function cancelGuess() {
   }
 
   .option-text-overlay {
-    padding: 1.75rem 1.25rem;
+    bottom: 1.25rem;
   }
 
   .option-text {
-    font-size: 1.3rem;
-    font-weight: 800;
+    font-size: 1.4rem;
+    font-weight: 900;
+    padding: 0.95rem 1.6rem;
   }
 }
 
@@ -7319,13 +7362,27 @@ function cancelGuess() {
   }
 
   .option-text-overlay {
-    padding: 1.5rem 1rem;
+    bottom: 1rem;
+    left: 0.75rem;
+    right: 0.75rem;
   }
 
   .option-text {
-    font-size: 1.2rem;
-    font-weight: 800;
-    -webkit-text-stroke: 0.4px rgba(0, 0, 0, 0.4);
+    font-size: 1.3rem;
+    font-weight: 900;
+    padding: 0.9rem 1.5rem;
+    text-shadow:
+      -1.5px -1.5px 0 rgba(0, 0, 0, 0.95),
+      1.5px -1.5px 0 rgba(0, 0, 0, 0.95),
+      -1.5px 1.5px 0 rgba(0, 0, 0, 0.95),
+      1.5px 1.5px 0 rgba(0, 0, 0, 0.95),
+      -2px 0 0 rgba(0, 0, 0, 0.9),
+      2px 0 0 rgba(0, 0, 0, 0.9),
+      0 -2px 0 rgba(0, 0, 0, 0.9),
+      0 2px 0 rgba(0, 0, 0, 0.9),
+      0 0 15px rgba(0, 0, 0, 0.8),
+      0 0 30px rgba(0, 0, 0, 0.6),
+      0 3px 6px rgba(0, 0, 0, 0.9);
   }
 
   .option-card:hover:not(.disabled) .option-card-inner {
@@ -7337,7 +7394,7 @@ function cancelGuess() {
   }
 
   .option-card:hover:not(.disabled) .option-text {
-    transform: translateY(-4px) scale(1.05);
+    transform: translateY(-6px) scale(1.04);
   }
 }
 
@@ -7348,13 +7405,32 @@ function cancelGuess() {
   }
 
   .option-text-overlay {
-    padding: 1.25rem 0.875rem;
+    bottom: 0.75rem;
+    left: 0.5rem;
+    right: 0.5rem;
   }
 
   .option-text {
-    font-size: 1.1rem;
-    font-weight: 800;
-    -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.4);
+    font-size: 1.15rem;
+    font-weight: 900;
+    padding: 0.8rem 1.25rem;
+    text-shadow:
+      -1.5px -1.5px 0 rgba(0, 0, 0, 0.95),
+      1.5px -1.5px 0 rgba(0, 0, 0, 0.95),
+      -1.5px 1.5px 0 rgba(0, 0, 0, 0.95),
+      1.5px 1.5px 0 rgba(0, 0, 0, 0.95),
+      -2px 0 0 rgba(0, 0, 0, 0.9),
+      2px 0 0 rgba(0, 0, 0, 0.9),
+      0 -2px 0 rgba(0, 0, 0, 0.9),
+      0 2px 0 rgba(0, 0, 0, 0.9),
+      0 0 12px rgba(0, 0, 0, 0.8),
+      0 0 24px rgba(0, 0, 0, 0.6),
+      0 2px 5px rgba(0, 0, 0, 0.9);
+  }
+
+  .option-text::before {
+    inset: -0.4rem -0.85rem;
+    border-radius: 16px;
   }
 }
 
